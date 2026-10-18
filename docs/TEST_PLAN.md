@@ -15,7 +15,7 @@ Tests are never skipped or disabled to get a green run. A test that fails becaus
 
 ## What is covered
 
-### Unit (43 tests)
+### Unit (46 tests)
 
 - **Content validation**: plain facts pass; unverified claims, wrong phone numbers, placeholders, over-length text and near-duplicates are caught; risky review replies are flagged; training instructions asking for unverified claims are warned.
 - **Policies**: per-star review modes; 1 to 2-star ratings never auto-publish even if misconfigured; already-answered or in-flight reviews are skipped; templates; post approval modes; failed validation forces approval; only defined task transitions; client approvers can only view and approve; org management stays with owners.
@@ -26,6 +26,7 @@ Tests are never skipped or disabled to get a green run. A test that fails becaus
 - **Schedules and holidays**: validation; next run in the business time zone across DST; intervals; floating holidays.
 - **SEO**: on-page extraction; local title recommendations with basis labels; LocalBusiness JSON-LD from facts only; hidden-address businesses omit the street; script-tag escaping.
 - **Text and redirects**: normalization and escaping; only same-origin redirect paths accepted.
+- **Gemini writing provider** (mocked HTTP): schema sent as structured output and replies parsed; replies that do not match the schema rejected; refusals and bad keys reported clearly.
 
 ### Integration (31 tests)
 

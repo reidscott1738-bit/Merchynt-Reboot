@@ -31,7 +31,7 @@ Last updated: 2026-10-18.
 |---|---|
 | `npm run typecheck` | Pass |
 | `npm run lint` | Pass |
-| `npm test` (Vitest) | 74 of 74 pass, 11 files (43 unit, 31 integration) |
+| `npm test` (Vitest) | 77 of 77 pass, 12 files (46 unit, 31 integration) |
 | `npm run build` | Pass |
 | `npm run test:e2e` (Playwright, production build) | 8 of 8 pass |
 
@@ -49,7 +49,7 @@ Bugs found and fixed by the tests:
 | Meta app with App Review for page and Instagram permissions | Facebook and Instagram publishing | Reid |
 | LinkedIn app with Community Management API | LinkedIn publishing | Reid |
 | DataForSEO account | Live grid audits and keyword volumes | Reid |
-| Anthropic API key | Real AI writing (otherwise demo text, labeled) | Reid |
+| Anthropic API key, or a free Gemini API key | Real AI writing (otherwise demo text, labeled) | Reid |
 | OpenAI, Gemini and/or Perplexity keys | Live AI visibility audits | Reid |
 | ElevenLabs key | Video narration | Reid |
 | SMTP relay | Sending approval emails, invites, review requests and reports | Reid |

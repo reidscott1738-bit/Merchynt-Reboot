@@ -19,6 +19,8 @@ const schema = z.object({
 
   ANTHROPIC_API_KEY: z.string().optional(),
   AI_MODEL: z.string().default("claude-opus-5-5"),
+  /** Used for AI writing when ANTHROPIC_API_KEY is unset and GEMINI_API_KEY is set. */
+  AI_GEMINI_MODEL: z.string().default("gemini-2.5-flash"),
 
   GOOGLE_CLIENT_ID: z.string().optional(),
   GOOGLE_CLIENT_SECRET: z.string().optional(),

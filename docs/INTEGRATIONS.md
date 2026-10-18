@@ -23,9 +23,9 @@ None of these has been verified against a live account yet: no credentials were 
 | LinkedIn Pages | Organization posts with images | `LINKEDIN_CLIENT_ID`, `LINKEDIN_CLIENT_SECRET` | `w_organization_social r_organization_social rw_organization_admin`; REST Posts API | https://learn.microsoft.com/en-us/linkedin/marketing/community-management/shares/posts-api |
 | CompanyCam | Importing recent job photos into the media library | `COMPANYCAM_CLIENT_ID`, `COMPANYCAM_CLIENT_SECRET` | OAuth; `api.companycam.com/v2` photos | https://docs.companycam.com/docs/authentication |
 | DataForSEO | Grid ranking audits (Google Maps SERP per grid point) and keyword search volume | `DATAFORSEO_LOGIN`, `DATAFORSEO_PASSWORD` | `serp/google/maps/live/advanced`, `keywords_data/google_ads/search_volume/live` | https://docs.dataforseo.com/v3/ |
-| Anthropic | All AI writing: posts, replies, descriptions, website copy, FAQs, video scripts, alt text, fact extraction | `ANTHROPIC_API_KEY`, `AI_MODEL` | Messages API via `@anthropic-ai/sdk` | https://docs.claude.com |
+| Anthropic | All AI writing (preferred when set): posts, replies, descriptions, website copy, FAQs, video scripts, alt text, fact extraction | `ANTHROPIC_API_KEY`, `AI_MODEL` | Messages API via `@anthropic-ai/sdk` | https://docs.claude.com |
 | OpenAI | AI visibility audit answers | `OPENAI_API_KEY`, `AI_VISIBILITY_OPENAI_MODEL` | Responses API | https://platform.openai.com/docs |
-| Google Gemini | AI visibility audit answers | `GEMINI_API_KEY`, `AI_VISIBILITY_GEMINI_MODEL` | `generateContent` | https://ai.google.dev/gemini-api/docs |
+| Google Gemini | AI visibility audit answers; also all AI writing when no Anthropic key is set (free tier available) | `GEMINI_API_KEY`, `AI_GEMINI_MODEL`, `AI_VISIBILITY_GEMINI_MODEL` | `generateContent` with JSON structured output | https://ai.google.dev/gemini-api/docs |
 | Perplexity | AI visibility audit answers | `PERPLEXITY_API_KEY`, `AI_VISIBILITY_PERPLEXITY_MODEL` | Chat completions | https://docs.perplexity.ai |
 | ElevenLabs | Video narration | `ELEVENLABS_API_KEY`, `ELEVENLABS_MODEL` | `text-to-speech/{voice}` | https://elevenlabs.io/docs |
 | SMTP | Approval emails, invites, review requests, reports | `SMTP_URL`, `EMAIL_FROM` | Any SMTP relay | — |
@@ -43,7 +43,7 @@ None of these has been verified against a live account yet: no credentials were 
 3. **LinkedIn**: an app with the Community Management API product approved.
 4. **CompanyCam**: an OAuth app from CompanyCam.
 5. **DataForSEO**: an account with credit. Each grid point is one SERP request; a 7×7 grid is 49 requests per keyword.
-6. **AI providers**: API keys with billing enabled.
+6. **AI providers**: an Anthropic key, or a free Gemini key from Google AI Studio. Google's free tier is rate-limited, and its terms allow Google to use free-tier prompts to improve its products, so move to a paid key before handling real customer data.
 7. **SMTP**: a relay with SPF and DKIM set for the sender domain.
 
 ## What is not integrated

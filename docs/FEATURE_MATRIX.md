@@ -41,7 +41,7 @@ Status as of 2026-10-18.
 |---|---|---|---|
 | Review ingestion | Implemented | Blocked on Google | `services/reviews.ts` `syncReviews` |
 | Rating-specific response policies | Tested | n/a | `lib/review-policy.ts`, `tests/integration/reviews` |
-| AI replies, templates and ignore rules | Tested | AI writing needs `ANTHROPIC_API_KEY` | Reviews |
+| AI replies, templates and ignore rules | Tested | AI writing needs `ANTHROPIC_API_KEY` or `GEMINI_API_KEY` | Reviews |
 | Human approval and task assignment | Tested | n/a | `tests/integration/approvals` |
 | Historical review processing | Implemented | Blocked on Google | `processReviews(..., "historical")` |
 | Review removal requests | Implemented | User files in Google | Reviews |
@@ -67,7 +67,7 @@ Status as of 2026-10-18.
 
 | Capability | Status | Live | Where |
 |---|---|---|---|
-| Multi-page site generation | Tested | AI writing needs `ANTHROPIC_API_KEY` | `services/websites.ts` |
+| Multi-page site generation | Tested | AI writing needs `ANTHROPIC_API_KEY` or `GEMINI_API_KEY` | `services/websites.ts` |
 | Page and section editing, manual edits kept on regenerate | Tested | n/a | `tests/integration/website` |
 | Title tags and meta descriptions | Implemented | n/a | Website builder |
 | FAQs and structured data | Tested (schema) | n/a | SEO screen, site renderer |

@@ -52,7 +52,7 @@ export default async function BusinessDashboard({ params, searchParams }: { para
             .
           </Alert>
         )}
-        {!ai.configured && <Alert tone="yellow" title="AI is not configured">Generated drafts are unavailable until an administrator sets ANTHROPIC_API_KEY, or enables demo mode for labeled samples.</Alert>}
+        {!ai.configured && <Alert tone="yellow" title="AI is not configured">Generated drafts are unavailable until an administrator sets ANTHROPIC_API_KEY or GEMINI_API_KEY, or enables demo mode for labeled samples.</Alert>}
         {failing.length > 0 && (
           <Alert tone="red" title="Automations need attention">
             {failing.map((a) => a.meta.label).join(", ")} failed on recent runs.{" "}

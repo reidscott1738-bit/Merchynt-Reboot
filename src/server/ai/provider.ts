@@ -1,8 +1,9 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { betaZodOutputFormat } from "@anthropic-ai/sdk/helpers/beta/zod";
-import type { z } from "zod";
+import { z } from "zod";
 import { env } from "../env";
 import { AppError, notConfigured, TransientError } from "../errors";
+import { httpJson, ProviderAuthError } from "../integrations/http";
 
 export type Effort = "low" | "medium" | "high";
 
@@ -24,7 +25,7 @@ export type Usage = { inputTokens: number; outputTokens: number };
 export type GenerationMeta = { provider: string; model: string; isDemo: boolean; task: string; generatedAt: string; usage?: Usage };
 
 export interface AiProvider {
-  readonly id: "anthropic" | "demo";
+  readonly id: "anthropic" | "gemini" | "demo";
   readonly isDemo: boolean;
   readonly model: string;
   json<T>(req: JsonRequest<T>): Promise<{ data: T; meta: GenerationMeta }>;
@@ -75,6 +76,73 @@ class AnthropicProvider implements AiProvider {
   }
 }
 
+/** JSON Schema for Gemini's structured output, without the meta keyword it does not accept. */
+function geminiSchema(schema: z.ZodType): Record<string, unknown> {
+  const { $schema: _ignored, ...rest } = z.toJSONSchema(schema, { target: "draft-7", io: "output" }) as Record<string, unknown>;
+  void _ignored;
+  return rest;
+}
+
+/**
+ * Google Gemini through the Gemini API. Its free tier makes it the low-cost
+ * option; output uses JSON mode constrained by the same zod schema.
+ */
+export class GeminiProvider implements AiProvider {
+  readonly id = "gemini" as const;
+  readonly isDemo = false;
+  constructor(private apiKey: string, readonly model: string) {}
+
+  async json<T>(req: JsonRequest<T>) {
+    type R = {
+      candidates?: { content?: { parts?: { text?: string }[] }; finishReason?: string }[];
+      promptFeedback?: { blockReason?: string };
+      usageMetadata?: { promptTokenCount?: number; candidatesTokenCount?: number };
+      modelVersion?: string;
+    };
+    let res: R;
+    try {
+      res = await httpJson<R>(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(this.model)}:generateContent`, {
+        method: "POST",
+        headers: { "x-goog-api-key": this.apiKey },
+        timeoutMs: 120_000,
+        body: {
+          systemInstruction: { parts: [{ text: req.system }] },
+          contents: [{ role: "user", parts: [{ text: req.prompt }] }],
+          generationConfig: { maxOutputTokens: req.maxTokens ?? 16000, responseMimeType: "application/json", responseJsonSchema: geminiSchema(req.schema) },
+        },
+      });
+    } catch (e) {
+      if (e instanceof ProviderAuthError) throw new AppError("The AI provider rejected the API key. Check GEMINI_API_KEY.", "not_configured");
+      throw e;
+    }
+    const c = res.candidates?.[0];
+    if (res.promptFeedback?.blockReason || c?.finishReason === "SAFETY" || c?.finishReason === "PROHIBITED_CONTENT") {
+      throw new AppError("The AI model declined to generate this content. Edit the request or instructions and try again.", "invalid");
+    }
+    if (c?.finishReason === "MAX_TOKENS") throw new TransientError("AI response was cut off before completion");
+    const text = (c?.content?.parts ?? []).map((p) => p.text ?? "").join("");
+    let raw: unknown;
+    try {
+      raw = JSON.parse(text);
+    } catch {
+      throw new TransientError("AI response was not valid JSON");
+    }
+    const parsed = req.schema.safeParse(raw);
+    if (!parsed.success) throw new TransientError("AI response did not match the expected format");
+    return {
+      data: parsed.data,
+      meta: {
+        provider: "gemini",
+        model: res.modelVersion ?? this.model,
+        isDemo: false,
+        task: req.task,
+        generatedAt: new Date().toISOString(),
+        usage: { inputTokens: res.usageMetadata?.promptTokenCount ?? 0, outputTokens: res.usageMetadata?.candidatesTokenCount ?? 0 },
+      },
+    };
+  }
+}
+
 class DemoProvider implements AiProvider {
   readonly id = "demo" as const;
   readonly isDemo = true;
@@ -95,13 +163,15 @@ export function getAi(): AiProvider {
   if (override) return override;
   const e = env();
   if (e.ANTHROPIC_API_KEY) return new AnthropicProvider(e.ANTHROPIC_API_KEY, e.AI_MODEL);
+  if (e.GEMINI_API_KEY) return new GeminiProvider(e.GEMINI_API_KEY, e.AI_GEMINI_MODEL);
   if (e.DEMO_MODE) return new DemoProvider();
-  throw notConfigured("No AI provider is configured. Set ANTHROPIC_API_KEY, or enable DEMO_MODE for labeled sample output.");
+  throw notConfigured("No AI provider is configured. Set ANTHROPIC_API_KEY or GEMINI_API_KEY, or enable DEMO_MODE for labeled sample output.");
 }
 
 export function aiStatus(): { configured: boolean; provider: string; isDemo: boolean; model: string | null } {
   const e = env();
   if (e.ANTHROPIC_API_KEY) return { configured: true, provider: "Anthropic", isDemo: false, model: e.AI_MODEL };
+  if (e.GEMINI_API_KEY) return { configured: true, provider: "Google Gemini", isDemo: false, model: e.AI_GEMINI_MODEL };
   if (e.DEMO_MODE) return { configured: true, provider: "Demo templates", isDemo: true, model: null };
   return { configured: false, provider: "None", isDemo: false, model: null };
 }
