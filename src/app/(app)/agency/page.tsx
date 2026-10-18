@@ -13,7 +13,7 @@ export default async function AgencyPage({ searchParams }: { searchParams: SP })
   const { actor, can } = await orgPage();
   if (!can("clients.manage")) notFound();
   const [clients, health] = await Promise.all([listClients(actor), clientHealth(actor)]);
-  const H = () => <input type="hidden" name="_back" value="/agency" />;
+  const hidden = () => <input type="hidden" name="_back" value="/agency" />;
   const attention = health.filter((h) => h.level !== "ok").sort((a, b) => b.signals.length - a.signals.length);
   return (
     <>
@@ -55,7 +55,7 @@ export default async function AgencyPage({ searchParams }: { searchParams: SP })
             clients.map((c) => (
               <Card key={c.id} title={<span className="flex items-center gap-2">{c.name} <StatusBadge status={c.status} /></span>} description={`${c.businesses} active business${c.businesses === 1 ? "" : "es"}`}>
                 <form action={agencyAction} className="grid gap-3 md:grid-cols-2">
-                  <H />
+                  {hidden()}
                   <input type="hidden" name="id" value={c.id} />
                   <Field label="Name">
                     <Input name="name" defaultValue={c.name} required />
@@ -86,7 +86,7 @@ export default async function AgencyPage({ searchParams }: { searchParams: SP })
         </div>
         <Card title="Add a client">
           <form action={agencyAction} className="space-y-3">
-            <H />
+            {hidden()}
             <Field label="Name">
               <Input name="name" required maxLength={120} />
             </Field>

@@ -16,7 +16,7 @@ export default async function SeoPage({ params, searchParams }: { params: Promis
   const base = `/b/${businessId}/seo`;
   const back = `${base}?tab=${tab}`;
   const edit = can("website.edit");
-  const H = () => (
+  const hidden = () => (
     <>
       <input type="hidden" name="businessId" value={businessId} />
       <input type="hidden" name="_back" value={back} />
@@ -33,7 +33,7 @@ export default async function SeoPage({ params, searchParams }: { params: Promis
         actions={
           edit && (
             <form action={seoAction}>
-              <H />
+              {hidden()}
               <SubmitButton name="op" value="schema" size="sm" variant="secondary">
                 {doc ? "Regenerate" : "Generate"}
               </SubmitButton>
@@ -73,7 +73,7 @@ export default async function SeoPage({ params, searchParams }: { params: Promis
           <Card title="Add FAQs" description="AI drafts answers only from verified facts. Every draft goes to Tasks for approval before it appears on your website.">
             <div className="flex flex-wrap items-end gap-6">
               <form action={seoAction} className="flex items-end gap-2">
-                <H />
+                {hidden()}
                 <Field label="How many">
                   <Select name="count" defaultValue="5">
                     {[3, 5, 10].map((n) => (
@@ -89,7 +89,7 @@ export default async function SeoPage({ params, searchParams }: { params: Promis
               </form>
             </div>
             <form action={seoAction} className="mt-4 grid gap-3 border-t border-slate-100 pt-4">
-              <H />
+              {hidden()}
               <Field label="Question">
                 <Input name="question" required maxLength={200} />
               </Field>
@@ -110,7 +110,7 @@ export default async function SeoPage({ params, searchParams }: { params: Promis
           faqs.map((f) => (
             <Card key={f.id}>
               <form action={seoAction} className="space-y-2">
-                <H />
+                {hidden()}
                 <input type="hidden" name="id" value={f.id} />
                 <div className="flex flex-wrap items-center gap-2">
                   <StatusBadge status={f.status} />
@@ -150,7 +150,7 @@ export default async function SeoPage({ params, searchParams }: { params: Promis
         {can("audits.run") && (
           <Card title="Audit a page" description="Fetches the page the way a search engine does and checks titles, headings, local signals, structured data, robots.txt and sitemap. Facts found on the site are proposed for you to confirm in Train AI.">
             <form action={seoAction} className="flex flex-wrap gap-2">
-              <H />
+              {hidden()}
               <Input name="url" type="url" defaultValue={latest?.audit.url ?? business.website ?? ""} placeholder="https://example.com" className="min-w-72 flex-1" />
               <SubmitButton name="op" value="audit" pendingText="Starting…">
                 Run audit
@@ -189,7 +189,7 @@ export default async function SeoPage({ params, searchParams }: { params: Promis
                     <Td>
                       {edit && ["needs_work", "unverifiable", "pending"].includes(r.status) && (
                         <form action={seoAction} className="flex flex-col gap-1">
-                          <H />
+                          {hidden()}
                           <input type="hidden" name="recId" value={r.id} />
                           <SubmitButton name="op" value="applied" size="sm" variant="secondary">
                             Done

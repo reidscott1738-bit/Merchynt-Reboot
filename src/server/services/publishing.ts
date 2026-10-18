@@ -262,7 +262,7 @@ async function afterPublication(pub: PublicationRow) {
         type: "publish.failed",
         title: status === "failed" ? "A post failed to publish" : "A post published to some destinations only",
         body: all.filter((p) => p.status !== "succeeded").map((p) => `${p.destination}: ${p.lastError ?? p.status}`).join("; "),
-        link: `/b/${pub.businessId}/posts/${pub.refId}`,
+        link: `/b/${pub.businessId}/posts?tab=all`,
       });
     }
     await logActivity({ orgId, businessId: pub.businessId, actor: systemActor, action: `content.${status}`, target: { type: "content_item", id: pub.refId }, detail: outcome });

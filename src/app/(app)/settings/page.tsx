@@ -31,7 +31,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: SP 
   if (!tabs.length) notFound();
   const tab = tabs.find((t) => t.key === sp.tab)?.key ?? tabs[0].key;
   const back = `/settings?tab=${tab}`;
-  const H = () => <input type="hidden" name="_back" value={back} />;
+  const hidden = () => <input type="hidden" name="_back" value={back} />;
 
   let body: React.ReactNode = null;
   if (tab === "org") {
@@ -39,7 +39,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: SP 
     body = (
       <Card title="Organization">
         <form action={settingsAction} className="max-w-lg space-y-3">
-          <H />
+          {hidden()}
           <Field label="Name">
             <Input name="name" defaultValue={org.name} required maxLength={120} />
           </Field>
@@ -58,7 +58,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: SP 
     );
   } else if (tab === "members") {
     const [{ members, invitations }, clients] = await Promise.all([listMembers(actor), listClients(actor)]);
-    const ClientPicker = ({ selected }: { selected: string[] | null }) =>
+    const clientPicker = (selected: string[] | null) =>
       clients.length > 0 ? (
         <div className="space-y-0.5">
           <p className="text-xs text-slate-500">Limit to clients (required for client approvers)</p>
@@ -80,7 +80,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: SP 
         )}
         <Card title="Invite someone">
           <form action={settingsAction} className="grid gap-3 md:grid-cols-3">
-            <H />
+            {hidden()}
             <Field label="Email">
               <Input name="email" type="email" required />
             </Field>
@@ -93,7 +93,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: SP 
                 ))}
               </Select>
             </Field>
-            <ClientPicker selected={null} />
+            {clientPicker(null)}
             <div className="md:col-span-3">
               <SubmitButton name="op" value="invite" size="sm">
                 Send invitation
@@ -122,7 +122,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: SP 
                     <span className="text-sm">{ROLE_LABELS[m.role]} (you)</span>
                   ) : (
                     <form action={settingsAction} className="space-y-2">
-                      <H />
+                      {hidden()}
                       <input type="hidden" name="id" value={m.id} />
                       <Select name="role" defaultValue={m.role} aria-label="Role">
                         {ROLES.filter((r) => r !== "owner" || actor.role === "owner").map((r) => (
@@ -131,7 +131,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: SP 
                           </option>
                         ))}
                       </Select>
-                      <ClientPicker selected={m.clientIds} />
+                      {clientPicker(m.clientIds)}
                       <SubmitButton name="op" value="member" size="sm" variant="secondary">
                         Save
                       </SubmitButton>
@@ -142,7 +142,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: SP 
                 <Td>
                   {u.id !== actor.userId && (
                     <form action={settingsAction}>
-                      <H />
+                      {hidden()}
                       <input type="hidden" name="id" value={m.id} />
                       {m.status === "active" ? (
                         <SubmitButton name="op" value="deactivate" size="sm" variant="ghost" confirm={`Remove ${u.name}'s access?`}>
@@ -170,7 +170,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: SP 
                   <Td className="text-xs">{i.expiresAt < new Date() ? <StatusBadge status="expired" /> : formatDateTime(i.expiresAt)}</Td>
                   <Td>
                     <form action={settingsAction}>
-                      <H />
+                      {hidden()}
                       <input type="hidden" name="id" value={i.id} />
                       <SubmitButton name="op" value="revoke-invite" size="sm" variant="ghost">
                         Revoke
@@ -189,7 +189,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: SP 
     body = (
       <Card title="White label" description="Shown to clients in emails, approval pages, reports and connection invites.">
         <form action={settingsAction} className="grid gap-3 md:grid-cols-2">
-          <H />
+          {hidden()}
           <Field label="Brand name">
             <Input name="displayName" defaultValue={b?.displayName ?? ""} maxLength={80} />
           </Field>
@@ -266,7 +266,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: SP 
                 </Table>
               )}
               <form action={settingsAction} className="mt-2 flex gap-2">
-                <H />
+                {hidden()}
                 <input type="hidden" name="id" value={d.id} />
                 <SubmitButton name="op" value="verify-domain" size="sm" variant="secondary">
                   Check DNS
@@ -278,7 +278,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: SP 
             </div>
           ))}
           <form action={settingsAction} className="flex gap-2">
-            <H />
+            {hidden()}
             <Input name="hostname" placeholder="app.youragency.com" required />
             <SubmitButton name="op" value="add-domain" size="sm" variant="secondary">
               Add domain
@@ -295,7 +295,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: SP 
         description="Link accounts to a business from that business's Integrations page."
         actions={
           <form action={settingsAction}>
-            <H />
+            {hidden()}
             <SubmitButton name="op" value="health" size="sm" variant="secondary" pendingText="Checking…">
               Check all
             </SubmitButton>
@@ -323,7 +323,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: SP 
                 <Td>
                   {c.status !== "revoked" && (
                     <form action={settingsAction}>
-                      <H />
+                      {hidden()}
                       <input type="hidden" name="id" value={c.id} />
                       <SubmitButton name="op" value="disconnect" size="sm" variant="ghost" confirm="Disconnect this account? Publishing to its pages stops.">
                         Disconnect
@@ -350,7 +350,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: SP 
         <Card title="Report credits" description="On-demand reports use credits. There is no billing integration yet, so owners adjust the balance by hand and every change is logged.">
           <p className="mb-3 text-2xl font-semibold">{credits}</p>
           <form action={settingsAction} className="flex flex-wrap items-end gap-2">
-            <H />
+            {hidden()}
             <Field label="Add or remove">
               <Input name="amount" type="number" step={1} required className="w-32" />
             </Field>

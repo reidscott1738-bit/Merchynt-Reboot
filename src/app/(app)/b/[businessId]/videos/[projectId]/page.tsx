@@ -30,7 +30,7 @@ export default async function VideoEditor({ params, searchParams }: { params: Pr
   const editable = can("content.create") && ["draft", "rendered", "failed", "pending_approval"].includes(p.status);
   const stale = p.renderedRevision != null && p.renderedRevision !== p.revision;
   const voice = voiceProviderStatus();
-  const H = ({ sceneId }: { sceneId?: string }) => (
+  const hidden = (sceneId?: string) => (
     <>
       <input type="hidden" name="businessId" value={businessId} />
       <input type="hidden" name="_back" value={back} />
@@ -57,7 +57,7 @@ export default async function VideoEditor({ params, searchParams }: { params: Pr
         actions={
           can("content.create") && (
             <form action={videoAction} className="flex gap-2">
-              <H />
+              {hidden()}
               {p.status !== "rendering" && p.status !== "publishing" && p.status !== "published" && (
                 <SubmitButton name="op" value="render" variant={p.outputAssetId && !stale ? "secondary" : "primary"}>
                   {p.outputAssetId ? "Re-render" : "Render video"}
@@ -84,7 +84,7 @@ export default async function VideoEditor({ params, searchParams }: { params: Pr
           {scenes.map((sc, i) => (
             <Card key={sc.id} title={`Scene ${i + 1}`}>
               <form action={videoAction} className="grid gap-4 md:grid-cols-[9rem_1fr]">
-                <H sceneId={sc.id} />
+                {hidden(sc.id)}
                 <div className="space-y-2">
                   {sc.mediaAssetId && (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -167,7 +167,7 @@ export default async function VideoEditor({ params, searchParams }: { params: Pr
           </Card>
           <Card title="Settings">
             <form action={videoAction} className="space-y-3">
-              <H />
+              {hidden()}
               <Field label="Title">
                 <Input name="title" defaultValue={p.title} disabled={!editable} />
               </Field>

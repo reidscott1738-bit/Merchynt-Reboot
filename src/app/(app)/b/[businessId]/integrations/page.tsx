@@ -29,7 +29,7 @@ export default async function IntegrationsPage({ params, searchParams }: { param
     }
   }
   const linkedKeys = new Set(targets.map((t) => `${t.target.targetType}|${t.target.externalId}`));
-  const H = () => (
+  const hidden = () => (
     <>
       <input type="hidden" name="businessId" value={businessId} />
       <input type="hidden" name="_back" value={base} />
@@ -70,7 +70,7 @@ export default async function IntegrationsPage({ params, searchParams }: { param
                 <Td>
                   {manage && (
                     <form action={integrationAction}>
-                      <H />
+                      {hidden()}
                       <input type="hidden" name="targetId" value={t.id} />
                       <SubmitButton name="op" value="unlink" size="sm" variant="ghost" confirm="Stop publishing to this destination?">
                         Unlink
@@ -100,7 +100,7 @@ export default async function IntegrationsPage({ params, searchParams }: { param
                         <Badge tone="green">Linked</Badge>
                       ) : (
                         <form action={integrationAction}>
-                          <H />
+                          {hidden()}
                           <input type="hidden" name="integrationId" value={discovered.integrationId} />
                           <input type="hidden" name="targetType" value={t.targetType} />
                           <input type="hidden" name="externalId" value={t.externalId} />
@@ -179,7 +179,7 @@ export default async function IntegrationsPage({ params, searchParams }: { param
         {manage && (
           <Card title="Ask the business owner to connect" description="Sends a secure, single-use link. The owner signs in with the provider directly; you never see their password.">
             <form action={integrationAction} className="flex flex-wrap items-end gap-2">
-              <H />
+              {hidden()}
               <Field label="Account">
                 <Select name="provider">
                   {INTEGRATION_PROVIDERS.filter((p) => isProviderConfigured(p)).map((p) => (
@@ -211,7 +211,7 @@ export default async function IntegrationsPage({ params, searchParams }: { param
                         <Td>
                           {state === "pending" && (
                             <form action={integrationAction}>
-                              <H />
+                              {hidden()}
                               <input type="hidden" name="inviteId" value={i.id} />
                               <SubmitButton name="op" value="revoke-invite" size="sm" variant="ghost">
                                 Revoke

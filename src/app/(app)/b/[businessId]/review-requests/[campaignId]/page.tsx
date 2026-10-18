@@ -24,7 +24,7 @@ export default async function CampaignPage({ params, searchParams }: { params: P
   const links = await listReviewLinks(actor, businessId);
   const back = `/b/${businessId}/review-requests/${c.id}`;
   const manage = can("campaigns.manage");
-  const H = () => (
+  const hidden = () => (
     <>
       <input type="hidden" name="businessId" value={businessId} />
       <input type="hidden" name="_back" value={back} />
@@ -44,7 +44,7 @@ export default async function CampaignPage({ params, searchParams }: { params: P
         actions={
           manage && (
             <form action={campaignAction} className="flex flex-wrap items-center gap-2">
-              <H />
+              {hidden()}
               {["draft", "validated"].includes(c.status) && (
                 <>
                   <SubmitButton name="op" value="validate" variant="secondary">
@@ -98,7 +98,7 @@ export default async function CampaignPage({ params, searchParams }: { params: P
           {manage && !["completed", "sending"].includes(c.status) && (
             <Card title="Edit campaign">
               <form action={campaignAction} className="space-y-4">
-                <H />
+                {hidden()}
                 <CampaignFields c={c} links={links.map((l) => ({ id: l.id, label: l.label }))} />
                 <SubmitButton name="op" value="update">
                   Save
@@ -111,7 +111,7 @@ export default async function CampaignPage({ params, searchParams }: { params: P
           <div className="space-y-6">
             <Card title="Import contacts" description="CSV with a header row: name, email (required), phone, service, salesperson. Invalid, duplicate and unsubscribed rows are kept but never emailed.">
               <form action={campaignAction} className="space-y-3">
-                <H />
+                {hidden()}
                 <input type="file" name="csv" accept=".csv,text/csv" className="block w-full text-sm" />
                 <Textarea name="csvText" rows={4} placeholder={"name,email\nJordan Lee,jordan@example.com"} />
                 <SubmitButton name="op" value="import" size="sm">
@@ -121,7 +121,7 @@ export default async function CampaignPage({ params, searchParams }: { params: P
             </Card>
             <Card title="Add one contact">
               <form action={campaignAction} className="space-y-3">
-                <H />
+                {hidden()}
                 <Field label="Name">
                   <Input name="contactName" />
                 </Field>

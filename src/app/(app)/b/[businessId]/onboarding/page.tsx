@@ -34,7 +34,7 @@ export default async function Onboarding({ params, searchParams }: { params: Pro
   const h = { businessId, back };
   const canEdit = can("business.edit");
 
-  const StepButtons = ({ step }: { step: string }) =>
+  const stepButtons = (step: string) =>
     canEdit ? (
       <div className="mt-6 flex flex-wrap gap-2 border-t border-slate-100 pt-4">
         <form action={onboardingStepAction}>
@@ -98,14 +98,14 @@ export default async function Onboarding({ params, searchParams }: { params: Pro
     body = (
       <>
         <KnowledgePanel rows={await listKnowledge(actor, businessId)} canEdit={canEdit} {...h} />
-        <StepButtons step="knowledge" />
+        {stepButtons("knowledge")}
       </>
     );
   } else if (current === "services") {
     body = (
       <>
         <ServicesPanel rows={await listServices(actor, businessId)} canEdit={canEdit} {...h} />
-        <StepButtons step="services" />
+        {stepButtons("services")}
       </>
     );
   } else if (current === "reviews") {
@@ -123,7 +123,7 @@ export default async function Onboarding({ params, searchParams }: { params: Pro
             {l.label}
           </LinkButton>
         )}
-        <StepButtons step={current} />
+        {stepButtons(current)}
       </>
     );
   }

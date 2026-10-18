@@ -10,7 +10,7 @@ export default async function AccountPage({ searchParams }: { searchParams: SP }
   const sp = await searchParams;
   const { actor } = await orgPage();
   const prefs = await getPrefs(actor.userId, actor.orgId);
-  const H = () => <input type="hidden" name="_back" value="/account" />;
+  const hidden = () => <input type="hidden" name="_back" value="/account" />;
   return (
     <>
       <PageHeader title="Your account" description={actor.email} />
@@ -18,7 +18,7 @@ export default async function AccountPage({ searchParams }: { searchParams: SP }
       <div className="grid gap-6 lg:grid-cols-2">
         <Card title="Profile">
           <form action={accountAction} className="space-y-3">
-            <H />
+            {hidden()}
             <Field label="Name">
               <Input name="name" defaultValue={actor.name} required maxLength={120} />
             </Field>
@@ -29,7 +29,7 @@ export default async function AccountPage({ searchParams }: { searchParams: SP }
         </Card>
         <Card title="Password">
           <form action={accountAction} className="space-y-3">
-            <H />
+            {hidden()}
             <Field label="Current password">
               <Input name="current" type="password" required autoComplete="current-password" />
             </Field>
@@ -46,7 +46,7 @@ export default async function AccountPage({ searchParams }: { searchParams: SP }
         </Card>
         <Card title={`Notifications for ${actor.orgName}`} className="lg:col-span-2">
           <form action={accountAction} className="space-y-4">
-            <H />
+            {hidden()}
             <Table head={["", "In app", "Email"]}>
               {NOTIFICATION_TYPES.map((t) => (
                 <tr key={t.key}>

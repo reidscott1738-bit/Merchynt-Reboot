@@ -47,7 +47,7 @@ export default async function WebsitePage({ params, searchParams }: { params: Pr
   const images = await listMedia(actor, businessId, { kind: "image", moderation: "approved", usage: "website" }, 60);
   const lastDeploy = deployments[0];
   const activeDomain = domains.find((d) => d.status === "active");
-  const H = ({ sectionId }: { sectionId?: string }) => (
+  const hidden = (sectionId?: string) => (
     <>
       <input type="hidden" name="businessId" value={businessId} />
       <input type="hidden" name="_back" value={back} />
@@ -80,7 +80,7 @@ export default async function WebsitePage({ params, searchParams }: { params: Pr
             </LinkButton>
             {can("website.publish") && (
               <form action={websiteAction} className="flex gap-2">
-                <H />
+                {hidden()}
                 {site.publishedRevisionId && (
                   <SubmitButton name="op" value="unpublish" variant="ghost" confirm="Take the website offline?">
                     Unpublish
@@ -126,7 +126,7 @@ export default async function WebsitePage({ params, searchParams }: { params: Pr
           </nav>
           {edit && (
             <form action={websiteAction} className="space-y-2 border-t border-slate-200 pt-3">
-              <H />
+              {hidden()}
               <Input name="title" placeholder="New page title" required />
               <SubmitButton name="op" value="add-page" size="sm" variant="secondary">
                 Add page
@@ -139,7 +139,7 @@ export default async function WebsitePage({ params, searchParams }: { params: Pr
             <>
               <Card title={`${page.title}`} description={`Address: ${page.path}`}>
                 <form action={websiteAction} className="grid gap-3 md:grid-cols-2">
-                  <H />
+                  {hidden()}
                   <Field label="Page title">
                     <Input name="title" defaultValue={page.title} disabled={!edit} />
                   </Field>
@@ -187,7 +187,7 @@ export default async function WebsitePage({ params, searchParams }: { params: Pr
                     description={meta?.live ? `Live content: ${meta.live}` : undefined}
                   >
                     <form action={websiteAction} className="space-y-3">
-                      <H sectionId={s.id} />
+                      {hidden(s.id)}
                       <Field label="Heading">
                         <Input name="heading" defaultValue={String(d.heading ?? "")} disabled={!edit} />
                       </Field>
@@ -232,7 +232,7 @@ export default async function WebsitePage({ params, searchParams }: { params: Pr
                     </form>
                     {edit && (meta?.copyFields.length ?? 0) > 0 && (
                       <form action={websiteAction} className="mt-3 flex flex-wrap items-end gap-2 border-t border-slate-100 pt-3">
-                        <H sectionId={s.id} />
+                        {hidden(s.id)}
                         <Field label="Regenerate with an instruction (optional)" className="min-w-64 flex-1">
                           <Input name="instruction" maxLength={300} placeholder="Shorter, mention same-day service" />
                         </Field>
@@ -247,7 +247,7 @@ export default async function WebsitePage({ params, searchParams }: { params: Pr
               })}
               {edit && (
                 <form action={websiteAction} className="flex items-end gap-2">
-                  <H />
+                  {hidden()}
                   <Field label="Add a section">
                     <Select name="type">
                       {Object.entries(SECTION_TYPES).map(([k, v]) => (
@@ -267,7 +267,7 @@ export default async function WebsitePage({ params, searchParams }: { params: Pr
           <div className="grid gap-6 xl:grid-cols-2">
             <Card title="Site settings">
               <form action={websiteAction} className="space-y-3">
-                <H />
+                {hidden()}
                 <Field label="Site name">
                   <Input name="name" defaultValue={site.name} disabled={!edit} />
                 </Field>
@@ -290,7 +290,7 @@ export default async function WebsitePage({ params, searchParams }: { params: Pr
             <Card title="Versions" description="Restoring a version replaces the draft; the live site changes when you publish.">
               {edit && (
                 <form action={websiteAction} className="mb-3 flex gap-2">
-                  <H />
+                  {hidden()}
                   <Input name="note" placeholder="Version note" />
                   <SubmitButton name="op" value="save-version" size="sm" variant="secondary">
                     Save
@@ -305,7 +305,7 @@ export default async function WebsitePage({ params, searchParams }: { params: Pr
                     </span>
                     {edit && (
                       <form action={websiteAction}>
-                        <H />
+                        {hidden()}
                         <input type="hidden" name="revisionId" value={r.id} />
                         <SubmitButton name="op" value="restore" size="sm" variant="ghost" confirm={`Restore version ${r.number} into the draft?`}>
                           Restore
@@ -339,7 +339,7 @@ export default async function WebsitePage({ params, searchParams }: { params: Pr
                     )}
                     {can("website.publish") && (
                       <form action={websiteAction} className="mt-2 flex gap-2">
-                        <H />
+                        {hidden()}
                         <input type="hidden" name="domainId" value={d.id} />
                         <SubmitButton name="op" value="verify-domain" size="sm" variant="secondary">
                           Check DNS
@@ -355,7 +355,7 @@ export default async function WebsitePage({ params, searchParams }: { params: Pr
             )}
             {can("website.publish") && (
               <form action={websiteAction} className="flex gap-2">
-                <H />
+                {hidden()}
                 <Input name="hostname" placeholder="www.example.com" required />
                 <SubmitButton name="op" value="add-domain" size="sm" variant="secondary">
                   Add domain

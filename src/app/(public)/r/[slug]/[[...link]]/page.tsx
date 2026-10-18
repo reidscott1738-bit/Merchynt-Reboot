@@ -17,7 +17,7 @@ export default async function ReviewPage({ params, searchParams }: { params: Pro
   if (!page) notFound();
   if (!sp.ok && !sp.err) await recordLinkEvent(page.business.id, page.link?.id ?? null, page.contact?.id ?? null, "open");
   const back = `/r/${slug}${linkSlug ? `/${linkSlug}` : ""}${sp.c ? `?c=${encodeURIComponent(sp.c)}` : ""}`;
-  const Hidden = () => (
+  const hidden = () => (
     <>
       <input type="hidden" name="slug" value={slug} />
       {linkSlug && <input type="hidden" name="link" value={linkSlug} />}
@@ -36,7 +36,7 @@ export default async function ReviewPage({ params, searchParams }: { params: Pro
       </div>
       <Flash ok={sp.ok} err={sp.err} />
       <form action={continueToGoogleAction}>
-        <Hidden />
+        {hidden()}
         <button type="submit" className="w-full rounded-xl px-6 py-4 text-lg font-semibold text-white shadow" style={{ background: color }}>
           Leave a review on Google
         </button>
@@ -46,7 +46,7 @@ export default async function ReviewPage({ params, searchParams }: { params: Pro
           <h2 className="font-semibold">Add photos of the finished work (optional)</h2>
           <p className="mt-1 text-sm text-slate-600">Google does not let other sites attach photos to your review, so photos you add here go to {page.business.name}, who may add them to their Google profile.</p>
           <form action={photoBoostAction} className="mt-4 space-y-3">
-            <Hidden />
+            {hidden()}
             <input type="file" name="files" accept="image/*" multiple required className="block w-full text-sm" />
             <Input name="name" placeholder="Your first name (optional)" maxLength={80} />
             <Input name="caption" placeholder="What was the job? (optional)" maxLength={200} />

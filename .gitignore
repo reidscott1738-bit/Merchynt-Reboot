@@ -8,3 +8,5 @@ next-env.d.ts
 playwright-report
 test-results
 coverage
+storage-test
+storage-e2e

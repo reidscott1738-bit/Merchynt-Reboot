@@ -94,7 +94,7 @@ export async function completeOAuth(provider: IntegrationProvider, code: string,
 
   if (st.connectionInviteId) {
     await db.update(connectionInvites).set({ usedAt: new Date(), outcome: "connected" }).where(eq(connectionInvites.id, st.connectionInviteId));
-    await notifyOrgUsers(st.orgId, st.businessId, { type: "integration.connected", title: `${OAUTH_PROVIDERS[provider].label} connected by client`, body: `${account.name} authorized a connection.`, link: st.businessId ? `/b/${st.businessId}/integrations` : "/settings/integrations" });
+    await notifyOrgUsers(st.orgId, st.businessId, { type: "integration.connected", title: `${OAUTH_PROVIDERS[provider].label} connected by client`, body: `${account.name} authorized a connection.`, link: st.businessId ? `/b/${st.businessId}/integrations` : "/settings?tab=integrations" });
   }
   await logActivity({ orgId: st.orgId, businessId: st.businessId, actor: st.userId ? userActor(st.userId) : systemActor, action: "integration.connected", target: { type: "integration", id: integration.id }, detail: { provider, account: account.name } });
   return { integration, businessId: st.businessId, redirectTo: st.redirectTo, viaInvite: Boolean(st.connectionInviteId) };
@@ -297,7 +297,7 @@ export async function healthCheck(integration: IntegrationRow): Promise<{ ok: bo
         type: "integration.unhealthy",
         title: `${OAUTH_PROVIDERS[integration.provider].label} needs attention`,
         body: `${integration.externalAccountName ?? "A connected account"}: ${err.message}. Reconnect it to resume publishing.`,
-        link: "/settings/integrations",
+        link: "/settings?tab=integrations",
       });
     }
     return { ok: false, error: err.message };

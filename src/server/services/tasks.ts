@@ -104,7 +104,7 @@ export async function sendTaskNotifications(task: TaskRow, tx: DbOrTx = db) {
     }
   }
   if (task.visibleInDashboard) {
-    await notifyOrgUsers(task.orgId, task.businessId, { type: `task.${task.type}`, title: task.title, body: task.summary ?? undefined, link: `/b/${task.businessId}/tasks/${task.id}` }, tx);
+    await notifyOrgUsers(task.orgId, task.businessId, { type: `task.${task.type}`, title: task.title, body: task.summary ?? undefined, link: `/tasks/${task.id}` }, tx);
   }
 }
 

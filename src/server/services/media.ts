@@ -55,7 +55,7 @@ export function sniffMime(buf: Buffer): { kind: "image" | "video" | "audio"; mim
 /** Reads capture metadata that is genuinely present in the file. Nothing is inferred or synthesized. */
 export async function readExif(buf: Buffer): Promise<{ lat: number | null; lng: number | null; takenAt: Date | null; raw: Record<string, unknown> | null }> {
   try {
-    const data = (await exifr.parse(buf, { gps: true, pick: ["Make", "Model", "DateTimeOriginal", "CreateDate", "latitude", "longitude", "GPSLatitude", "GPSLongitude", "Orientation", "Software"] })) as Record<string, unknown> | undefined;
+    const data = (await exifr.parse(buf, { gps: true, pick: ["Make", "Model", "DateTimeOriginal", "CreateDate", "latitude", "longitude", "GPSLatitude", "GPSLatitudeRef", "GPSLongitude", "GPSLongitudeRef", "Orientation", "Software"] })) as Record<string, unknown> | undefined;
     if (!data) return { lat: null, lng: null, takenAt: null, raw: null };
     const lat = typeof data.latitude === "number" && Number.isFinite(data.latitude) ? data.latitude : null;
     const lng = typeof data.longitude === "number" && Number.isFinite(data.longitude) ? data.longitude : null;

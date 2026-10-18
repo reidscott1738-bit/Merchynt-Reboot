@@ -16,7 +16,7 @@ export default async function ReviewsPage({ params, searchParams }: { params: Pr
   const qs = new URLSearchParams(Object.entries({ tab, rating: sp.rating, status: sp.status, q: sp.q }).filter(([, v]) => v) as [string, string][]).toString();
   const back = `${base}?${qs}`;
   const canReply = can("reviews.reply");
-  const H = () => (
+  const hidden = () => (
     <>
       <input type="hidden" name="businessId" value={businessId} />
       <input type="hidden" name="_back" value={back} />
@@ -35,7 +35,7 @@ export default async function ReviewsPage({ params, searchParams }: { params: Pr
             {templates.map((t) => (
               <li key={t.id}>
                 <form action={templateAction} className="space-y-2">
-                  <H />
+                  {hidden()}
                   <input type="hidden" name="id" value={t.id} />
                   <Input name="name" defaultValue={t.name} required />
                   <Textarea name="body" rows={3} defaultValue={t.body} required />
@@ -52,7 +52,7 @@ export default async function ReviewsPage({ params, searchParams }: { params: Pr
             ))}
           </ul>
           <form action={templateAction} className="mt-4 space-y-2 border-t border-slate-100 pt-4">
-            <H />
+            {hidden()}
             <Field label="New template name">
               <Input name="name" required />
             </Field>
@@ -79,7 +79,7 @@ export default async function ReviewsPage({ params, searchParams }: { params: Pr
                 <p className="mt-1">Reason: {report.reason}</p>
                 {report.detectedSignals?.length ? <p className="text-xs text-slate-500">Signals: {report.detectedSignals.join(", ")}</p> : null}
                 <form action={removalAction} className="mt-2 flex flex-wrap items-end gap-2">
-                  <H />
+                  {hidden()}
                   <input type="hidden" name="id" value={report.id} />
                   <Select name="status" defaultValue={report.status === "draft" ? "submitted" : report.status} className="w-48">
                     <option value="submitted">Submitted to Google</option>
@@ -157,7 +157,7 @@ export default async function ReviewsPage({ params, searchParams }: { params: Pr
                     <details className="mt-3" open={Boolean(draft)}>
                       <summary className="cursor-pointer text-sm font-medium text-blue-800">{draft ? "Edit and publish reply" : "Reply"}</summary>
                       <form action={reviewAction} className="mt-2 space-y-2">
-                        <H />
+                        {hidden()}
                         <input type="hidden" name="reviewId" value={r.id} />
                         <Textarea name="content" rows={4} defaultValue={draft?.content ?? ""} maxLength={4000} />
                         {draft?.validation && draft.validation.issues.length > 0 && (
@@ -194,7 +194,7 @@ export default async function ReviewsPage({ params, searchParams }: { params: Pr
                     <details className="mt-2">
                       <summary className="cursor-pointer text-xs text-slate-500">Request removal{signals.length ? ` (${signals.length} possible policy signal${signals.length > 1 ? "s" : ""})` : ""}</summary>
                       <form action={reviewAction} className="mt-2 space-y-2">
-                        <H />
+                        {hidden()}
                         <input type="hidden" name="reviewId" value={r.id} />
                         {signals.length > 0 && <p className="text-xs text-slate-500">Signals: {signals.join(", ")}</p>}
                         <Input name="reason" required placeholder="Which Google policy does it violate?" defaultValue={signals[0] ?? ""} />
@@ -222,7 +222,7 @@ export default async function ReviewsPage({ params, searchParams }: { params: Pr
         actions={
           can("reviews.manage") && (
             <form action={reviewAction} className="flex gap-2">
-              <H />
+              {hidden()}
               {business.gbpLocationName && (
                 <SubmitButton name="op" value="sync" variant="secondary" pendingText="Syncing…">
                   Sync from Google

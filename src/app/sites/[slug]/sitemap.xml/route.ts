@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { sitemapXml } from "@/server/services/websites";
 import { loadPublishedSite } from "../../load";
 

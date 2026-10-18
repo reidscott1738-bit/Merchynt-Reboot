@@ -26,7 +26,7 @@ export default async function PostsPage({ params, searchParams }: { params: Prom
   const [images, targets] = await Promise.all([listMedia(actor, businessId, { kind: "image", moderation: "approved", usage: "posts" }, 60), listTargets(actor, businessId)]);
   const connected = new Set<string>(targets.map((t) => t.provider as string));
   if (business.gbpLocationName) connected.add("google");
-  const H = () => (
+  const hidden = () => (
     <>
       <input type="hidden" name="businessId" value={businessId} />
       <input type="hidden" name="_back" value={back} />
@@ -89,7 +89,7 @@ export default async function PostsPage({ params, searchParams }: { params: Prom
     body = canCreate ? (
       <Card title="Write a post">
         <form action={createPostAction} className="space-y-4">
-          <H />
+          {hidden()}
           <Field label="Post text" hint="Google allows 1,500 characters. Phone numbers in the text are rejected by Google; use the button instead.">
             <CountedTextarea name="body" max={1500} required />
           </Field>
@@ -130,7 +130,7 @@ export default async function PostsPage({ params, searchParams }: { params: Prom
         </form>
       </Card>
     ) : (
-      <p className="text-sm text-slate-500">You can't create posts.</p>
+      <p className="text-sm text-slate-500">You can&apos;t create posts.</p>
     );
   } else {
     const status = tab === "upcoming" ? undefined : sp.status;
@@ -171,7 +171,7 @@ export default async function PostsPage({ params, searchParams }: { params: Prom
                     {p.approvalReason && p.status === "pending_approval" && <p className="mb-2 text-xs text-amber-700">{p.approvalReason}</p>}
                     {editable ? (
                       <form action={postAction} className="space-y-3">
-                        <H />
+                        {hidden()}
                         <input type="hidden" name="postId" value={p.id} />
                         <Textarea name="body" rows={5} defaultValue={p.body} maxLength={1500} />
                         {p.validation && p.validation.issues.length > 0 && (
@@ -227,7 +227,7 @@ export default async function PostsPage({ params, searchParams }: { params: Prom
                     <Publications rows={p.publications} />
                     {["failed", "partially_published"].includes(p.status) && can("content.approve") && (
                       <form action={postAction} className="mt-2">
-                        <H />
+                        {hidden()}
                         <input type="hidden" name="postId" value={p.id} />
                         <SubmitButton name="op" value="retry" size="sm" variant="secondary">
                           Retry failed destinations
@@ -251,7 +251,7 @@ export default async function PostsPage({ params, searchParams }: { params: Prom
         actions={
           canCreate && (
             <form action={postAction}>
-              <H />
+              {hidden()}
               <SubmitButton name="op" value="generate" pendingText="Drafting…">
                 Draft upcoming posts
               </SubmitButton>

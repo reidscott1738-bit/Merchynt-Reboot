@@ -27,7 +27,7 @@ export default async function SignupPage({ searchParams }: { searchParams: Promi
         <Field label="Account type">
           <Select name="orgKind" defaultValue="business">
             <option value="business">I manage my own business</option>
-            <option value="agency">I'm an agency managing clients</option>
+            <option value="agency">I&apos;m an agency managing clients</option>
           </Select>
         </Field>
         <SubmitButton className="w-full" pendingText="Creating…">

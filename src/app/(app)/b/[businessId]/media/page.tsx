@@ -18,7 +18,7 @@ export default async function MediaPage({ params, searchParams }: { params: Prom
   const base = `/b/${businessId}/media`;
   const back = `${base}?tab=${tab}${sp.kind ? `&kind=${sp.kind}` : ""}${sp.moderation ? `&moderation=${sp.moderation}` : ""}`;
   const manage = can("media.manage");
-  const H = () => (
+  const hidden = () => (
     <>
       <input type="hidden" name="businessId" value={businessId} />
       <input type="hidden" name="_back" value={back} />
@@ -55,7 +55,7 @@ export default async function MediaPage({ params, searchParams }: { params: Prom
                   <Td>
                     {manage && !l.revokedAt && (
                       <form action={uploadLinkAction}>
-                        <H />
+                        {hidden()}
                         <input type="hidden" name="id" value={l.id} />
                         <SubmitButton name="op" value="revoke" size="sm" variant="ghost">
                           Revoke
@@ -69,7 +69,7 @@ export default async function MediaPage({ params, searchParams }: { params: Prom
           )}
           {manage && (
             <form action={uploadLinkAction} className="mt-4 grid gap-3 border-t border-slate-100 pt-4 md:grid-cols-4 md:items-end">
-              <H />
+              {hidden()}
               <Field label="Name">
                 <Input name="label" required placeholder="Crew photos" />
               </Field>
@@ -96,20 +96,20 @@ export default async function MediaPage({ params, searchParams }: { params: Prom
           <Card title="Add photos and videos" description="JPEG, PNG, WebP, HEIC, GIF, MP4, MOV or WebM. Images up to 20 MB each; up to 100 MB per upload from the browser. Location data is read from photos only when the camera recorded it.">
             <div className="flex flex-wrap items-end gap-4">
               <form action={uploadMediaAction} className="flex flex-wrap items-end gap-2">
-                <H />
+                {hidden()}
                 <input type="file" name="files" multiple accept="image/*,video/*,audio/*" required className="text-sm" />
                 <SubmitButton pendingText="Uploading…">Upload</SubmitButton>
               </form>
               {business.gbpLocationName && (
                 <form action={importMediaAction}>
-                  <H />
+                  {hidden()}
                   <input type="hidden" name="source" value="google" />
                   <SubmitButton variant="secondary">Import from Google</SubmitButton>
                 </form>
               )}
               {hasCompanyCam && (
                 <form action={importMediaAction}>
-                  <H />
+                  {hidden()}
                   <input type="hidden" name="source" value="companycam" />
                   <input type="hidden" name="days" value="30" />
                   <SubmitButton variant="secondary">Import last 30 days from CompanyCam</SubmitButton>
@@ -171,7 +171,7 @@ export default async function MediaPage({ params, searchParams }: { params: Prom
                   )}
                   {a.moderationStatus === "pending" && can("media.approve") && (
                     <form action={mediaAction} className="flex gap-2">
-                      <H />
+                      {hidden()}
                       <input type="hidden" name="assetId" value={a.id} />
                       <SubmitButton name="op" value="approve" size="sm">
                         Approve
@@ -185,7 +185,7 @@ export default async function MediaPage({ params, searchParams }: { params: Prom
                     <details>
                       <summary className="cursor-pointer text-blue-800">Details and usage</summary>
                       <form action={mediaAction} className="mt-2 space-y-2">
-                        <H />
+                        {hidden()}
                         <input type="hidden" name="assetId" value={a.id} />
                         <Field label="Alt text">
                           <Input name="altText" maxLength={250} defaultValue={a.altText ?? ""} />

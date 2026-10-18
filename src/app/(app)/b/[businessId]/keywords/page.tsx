@@ -20,7 +20,7 @@ export default async function KeywordsPage({ params, searchParams }: { params: P
   const provider = rankingProviderStatus();
   const back = `/b/${businessId}/keywords`;
   const run = can("audits.run");
-  const H = () => (
+  const hidden = () => (
     <>
       <input type="hidden" name="businessId" value={businessId} />
       <input type="hidden" name="_back" value={back} />
@@ -34,7 +34,7 @@ export default async function KeywordsPage({ params, searchParams }: { params: P
         actions={
           run && (
             <form action={keywordAction} className="flex gap-2">
-              <H />
+              {hidden()}
               <SubmitButton name="op" value="suggest" variant="secondary">
                 Suggest keywords
               </SubmitButton>
@@ -68,7 +68,7 @@ export default async function KeywordsPage({ params, searchParams }: { params: P
                   <span className="font-medium">{s.phrase}</span> <span className="text-xs text-slate-500">{s.reason}</span>
                 </span>
                 <form action={keywordAction}>
-                  <H />
+                  {hidden()}
                   <input type="hidden" name="phrase" value={s.phrase} />
                   <input type="hidden" name="intent" value={s.intent} />
                   <input type="hidden" name="source" value="suggested" />
@@ -119,7 +119,7 @@ export default async function KeywordsPage({ params, searchParams }: { params: P
                   <details className="mt-3">
                     <summary className="cursor-pointer text-sm text-blue-800">Audit settings{cfg ? ` (version ${cfg.version})` : ""}</summary>
                     <form action={keywordAction} className="mt-3 grid gap-3 md:grid-cols-6">
-                      <H />
+                      {hidden()}
                       <input type="hidden" name="id" value={k.id} />
                       <Field label="Center latitude">
                         <Input name="centerLat" type="number" step="any" required defaultValue={cfg?.centerLat ?? business.latitude ?? ""} />
@@ -161,7 +161,7 @@ export default async function KeywordsPage({ params, searchParams }: { params: P
                       </div>
                     </form>
                     <form action={keywordAction} className="mt-3 flex flex-wrap items-end gap-3 border-t border-slate-100 pt-3">
-                      <H />
+                      {hidden()}
                       <input type="hidden" name="id" value={k.id} />
                       <Field label="Priority">
                         <Input name="priority" type="number" min={1} max={5} defaultValue={k.priority} className="w-20" />
@@ -191,7 +191,7 @@ export default async function KeywordsPage({ params, searchParams }: { params: P
       {run && (
         <Card title="Add a keyword" className="mt-6">
           <form action={keywordAction} className="grid gap-3 md:grid-cols-5 md:items-end">
-            <H />
+            {hidden()}
             <Field label="Keyword" className="md:col-span-2">
               <Input name="phrase" required minLength={2} placeholder="emergency plumber" />
             </Field>
