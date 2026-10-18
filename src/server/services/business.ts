@@ -72,7 +72,7 @@ export const businessInputSchema = z.object({
   averageCustomerValue: z.number().min(0).max(1_000_000).nullish(),
   brandPrimaryColor: z.string().regex(/^#[0-9a-fA-F]{6}$/).nullish(),
   brandVoice: z.string().max(400).nullish(),
-  googleReviewUrl: z.string().url().nullish().or(z.literal("").transform(() => null)),
+  googleReviewUrl: z.string().url().refine((u) => u.startsWith("https://"), "The review link must start with https://").nullish().or(z.literal("").transform(() => null)),
   clientId: z.string().uuid().nullish(),
 });
 export type BusinessInput = z.infer<typeof businessInputSchema>;

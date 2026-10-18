@@ -377,7 +377,7 @@ export function siteUrl(site: Pick<Website, "slug">, domain?: string | null) {
 /* ---------------- Public rendering data ---------------- */
 
 export type LiveData = {
-  business: { name: string; phone: string | null; email: string | null; address: string | null; hours: Record<string, { open: string; close: string }[]> | null; areas: string[]; appointmentUrl: string | null; googleReviewUrl: string | null; reviewSlug: string };
+  business: { name: string; phone: string | null; email: string | null; address: string | null; hours: Record<string, { open: string; close: string }[]> | null; areas: string[]; appointmentUrl: string | null; googleReviewUrl: string | null; reviewSlug: string; reviewPageUrl: string };
   services: { name: string; description: string | null; path: string | null }[];
   reviews: { name: string | null; rating: number; text: string | null; date: string; isDemo: boolean }[];
   photos: { id: string; alt: string | null }[];
@@ -386,17 +386,33 @@ export type LiveData = {
   schema: Record<string, unknown> | null;
 };
 
-export async function liveData(businessId: string, pages: { path: string; type: string; sections: SiteSection[] }[], base: string): Promise<LiveData> {
+/**
+ * Data for live sections. Public pages never include demo records; the
+ * draft preview may, with labels, so owners can see the layout.
+ */
+export async function liveData(businessId: string, pages: { path: string; type: string; sections: SiteSection[] }[], base: string, opts: { includeDemo?: boolean } = {}): Promise<LiveData> {
   const [b] = await db.select().from(businessLocations).where(eq(businessLocations.id, businessId)).limit(1);
   const svcs = await db.select().from(businessServices).where(and(eq(businessServices.businessId, businessId), eq(businessServices.status, "active"))).orderBy(asc(businessServices.name));
-  const revs = await db.select().from(reviews).where(and(eq(reviews.businessId, businessId), sql`${reviews.rating} >= 4`, sql`coalesce(length(${reviews.text}), 0) > 20`)).orderBy(desc(reviews.publishedAt)).limit(9);
+  const revs = await db.select().from(reviews).where(and(eq(reviews.businessId, businessId), sql`${reviews.rating} >= 4`, sql`coalesce(length(${reviews.text}), 0) > 20`, opts.includeDemo ? undefined : eq(reviews.isDemo, false))).orderBy(desc(reviews.publishedAt)).limit(9);
   const photos = await db.select({ id: mediaAssets.id, alt: mediaAssets.altText }).from(mediaAssets).where(and(eq(mediaAssets.businessId, businessId), eq(mediaAssets.kind, "image"), eq(mediaAssets.moderationStatus, "approved"), eq(mediaAssets.useForWebsite, true), isNull(mediaAssets.deletedAt))).orderBy(desc(mediaAssets.createdAt)).limit(12);
   const fq = await db.select().from(faqs).where(and(eq(faqs.businessId, businessId), inArray(faqs.status, ["approved", "published"]))).orderBy(asc(faqs.createdAt)).limit(30);
-  const posts = await db.select().from(contentItems).where(and(eq(contentItems.businessId, businessId), eq(contentItems.type, "gbp_post"), eq(contentItems.status, "published"))).orderBy(desc(contentItems.publishedAt)).limit(3);
+  const posts = await db
+    .select()
+    .from(contentItems)
+    .where(
+      and(
+        eq(contentItems.businessId, businessId),
+        eq(contentItems.type, "gbp_post"),
+        inArray(contentItems.status, ["published", "partially_published"]),
+        opts.includeDemo ? undefined : sql`exists (select 1 from publication_jobs pj where pj.ref_type = 'content_item' and pj.ref_id = ${contentItems.id} and pj.status = 'succeeded' and not pj.is_demo)`,
+      ),
+    )
+    .orderBy(desc(contentItems.publishedAt))
+    .limit(3);
   const servicePaths = new Map(pages.filter((p) => p.type === "service").map((p) => [String(p.sections.find((s) => s.type === "service_detail")?.data.serviceId ?? ""), p.path]));
   const { doc } = await buildSchemaForBusiness(businessId, base);
   return {
-    business: { name: b.name, phone: b.phone, email: b.email, address: b.hideAddress ? null : [b.addressLine1, b.addressLine2, b.city, b.region, b.postalCode].filter(Boolean).join(", ") || null, hours: (b.hours as LiveData["business"]["hours"]) ?? null, areas: b.serviceArea?.places ?? [], appointmentUrl: b.appointmentUrl, googleReviewUrl: b.googleReviewUrl, reviewSlug: b.reviewSlug },
+    business: { name: b.name, phone: b.phone, email: b.email, address: b.hideAddress ? null : [b.addressLine1, b.addressLine2, b.city, b.region, b.postalCode].filter(Boolean).join(", ") || null, hours: (b.hours as LiveData["business"]["hours"]) ?? null, areas: b.serviceArea?.places ?? [], appointmentUrl: b.appointmentUrl, googleReviewUrl: b.googleReviewUrl, reviewSlug: b.reviewSlug, reviewPageUrl: `${env().APP_URL.replace(/\/$/, "")}/r/${b.reviewSlug}` },
     services: svcs.map((s) => ({ name: s.name, description: s.description, path: servicePaths.get(s.id) ?? null })),
     reviews: revs.map((r) => ({ name: r.reviewerName, rating: r.rating, text: r.text, date: r.publishedAt.toISOString().slice(0, 10), isDemo: r.isDemo })),
     photos,
@@ -480,6 +496,7 @@ export function domainInstructions(d: { hostname: string; verificationToken: str
 export async function verifyCustomDomain(actor: Actor, domainId: string) {
   const [d] = await db.select().from(customDomains).where(and(eq(customDomains.id, domainId), eq(customDomains.orgId, actor.orgId))).limit(1);
   if (!d) throw notFound("Domain");
+  assertCan(actor, d.purpose === "app" ? "org.manage" : "website.publish");
   let records: string[] = [];
   let error: string | null = null;
   try {

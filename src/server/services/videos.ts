@@ -147,7 +147,8 @@ export async function updateVideoSettings(actor: Actor, businessId: string, proj
 }
 
 export async function moveScene(actor: Actor, businessId: string, projectId: string, sceneId: string, dir: -1 | 1) {
-  await requireProject(actor, businessId, projectId, "content.create");
+  const p = await requireProject(actor, businessId, projectId, "content.create");
+  if (!EDITABLE.includes(p.status)) throw invalid(`A ${p.status} video cannot be edited`);
   const scenes = await db.select().from(videoScenes).where(eq(videoScenes.projectId, projectId)).orderBy(asc(videoScenes.position));
   const i = scenes.findIndex((s) => s.id === sceneId);
   const j = i + dir;
@@ -158,7 +159,8 @@ export async function moveScene(actor: Actor, businessId: string, projectId: str
 }
 
 export async function removeScene(actor: Actor, businessId: string, projectId: string, sceneId: string) {
-  await requireProject(actor, businessId, projectId, "content.create");
+  const p = await requireProject(actor, businessId, projectId, "content.create");
+  if (!EDITABLE.includes(p.status)) throw invalid(`A ${p.status} video cannot be edited`);
   const scenes = await db.select().from(videoScenes).where(eq(videoScenes.projectId, projectId));
   if (scenes.length <= 2) throw invalid("A video needs at least two scenes");
   await db.delete(videoScenes).where(and(eq(videoScenes.id, sceneId), eq(videoScenes.projectId, projectId)));

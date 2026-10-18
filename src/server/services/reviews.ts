@@ -261,6 +261,14 @@ export async function draftReplyForReview(actor: Actor, businessId: string, revi
   return { content: data.reply, validation, demo: meta.isDemo, analysis: { sentiment: data.sentiment, praise: data.praise, complaints: data.complaints } };
 }
 
+/** Generates an AI draft and stores it as an unpublished draft the person can edit and submit. */
+export async function saveAiDraft(actor: Actor, businessId: string, reviewId: string) {
+  const d = await draftReplyForReview(actor, businessId, reviewId);
+  await db.update(reviewReplies).set({ status: "superseded" }).where(and(eq(reviewReplies.reviewId, reviewId), eq(reviewReplies.status, "draft")));
+  const [row] = await db.insert(reviewReplies).values({ reviewId, businessId, content: d.content, origin: "ai", status: "draft", validation: d.validation, generation: { demo: d.demo }, createdByUserId: actor.userId }).returning();
+  return row;
+}
+
 /** A person writes or edits a reply and publishes it. Validation errors block publishing. */
 export async function submitManualReply(actor: Actor, businessId: string, reviewId: string, content: string) {
   const r = await requireReview(actor, businessId, reviewId, "reviews.reply");

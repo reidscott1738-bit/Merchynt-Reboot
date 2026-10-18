@@ -172,7 +172,10 @@ export async function actWithApprovalToken(token: string, action: "approve" | "r
     .returning();
   const t = claimed[0];
   if (!t) throw new AppError("This approval link is no longer valid. It may have expired or already been used.", "invalid");
-  if (!t.allowedActions.includes(action) || (edits?.body && !t.allowedActions.includes("edit"))) throw forbidden("This link does not allow that action");
+  if (!t.allowedActions.includes(action) || (edits?.body && !t.allowedActions.includes("edit"))) {
+    await db.update(approvalTokens).set({ usedAt: null }).where(eq(approvalTokens.id, t.id));
+    throw forbidden("This link does not allow that action");
+  }
   let result: Awaited<ReturnType<typeof applyTaskAction>>;
   try {
     result = await applyTaskAction(t.taskId, action, { actorType: "approval_link", actorId: t.recipientEmail, actorLabel: t.recipientEmail }, { edits, reason });
@@ -302,7 +305,7 @@ export async function getTaskDetail(actor: Actor, taskId: string) {
   if (actor.clientIds !== null && (!row.business.clientId || !actor.clientIds.includes(row.business.clientId))) throw notFound("Task");
   const events = await db.select().from(taskEvents).where(eq(taskEvents.taskId, taskId)).orderBy(taskEvents.createdAt);
   const handler = handlers.get(row.task.refType);
-  const preview = handler ? await handler.preview(row.task).catch((e) => ({ title: row.task.title, body: `Preview unavailable: ${(e as Error).message}` })) : null;
+  const preview: Awaited<ReturnType<TaskHandler["preview"]>> | null = handler ? await handler.preview(row.task).catch((e) => ({ title: row.task.title, body: `Preview unavailable: ${(e as Error).message}` })) : null;
   const assignee = row.task.assigneeUserId ? (await db.select({ name: users.name, email: users.email }).from(users).where(eq(users.id, row.task.assigneeUserId)).limit(1))[0] : null;
   return { ...row, events, preview, editable: Boolean(handler?.editable), assignee };
 }

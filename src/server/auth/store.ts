@@ -81,3 +81,18 @@ export async function authenticate(emailRaw: string, password: string) {
     .limit(1);
   return { user, orgId: m?.orgId ?? null };
 }
+
+export async function updateProfileName(userId: string, name: string) {
+  const n = name.trim();
+  if (!n || n.length > 120) throw invalid("Enter your name");
+  await db.update(users).set({ name: n }).where(eq(users.id, userId));
+}
+
+/** Changes the password and signs out every other session. */
+export async function changePassword(userId: string, currentSessionToken: string, current: string, next: string) {
+  const [u] = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+  if (!u || !(await verifyPassword(current, u.passwordHash))) throw invalid("Your current password is incorrect");
+  if (next.length < 10) throw invalid("The new password must be at least 10 characters");
+  await db.update(users).set({ passwordHash: await hashPassword(next) }).where(eq(users.id, userId));
+  await db.delete(sessions).where(and(eq(sessions.userId, userId), sql`${sessions.id} <> ${sha256(currentSessionToken)}`));
+}

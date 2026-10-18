@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   serverExternalPackages: ["sharp", "pg", "nodemailer"],
   experimental: {
-    serverActions: { bodySizeLimit: "25mb" },
+    serverActions: { bodySizeLimit: "100mb" },
   },
   async headers() {
     return [
