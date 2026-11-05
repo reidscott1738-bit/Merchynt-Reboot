@@ -66,3 +66,4 @@ npm run build && npm run test:e2e   # PLAYWRIGHT_CHROMIUM_PATH=/path/to/chromium
 - [Integrations](docs/INTEGRATIONS.md)
 - [Implementation plan](docs/IMPLEMENTATION_PLAN.md) with completed work, test results, blockers and next tasks
 - [Test plan](docs/TEST_PLAN.md)
+- [Deployment](docs/DEPLOYMENT.md) (Railway or any Docker host)
